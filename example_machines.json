@@ -1,0 +1,37 @@
+{
+  "machines": [
+    {
+      "name": "myserver",
+      "ip": "192.168.0.10",
+      "hostname": "myserver.local",
+      "environment": "prod",
+      "projects": [
+        "myproject",
+        "project2"
+      ]
+    },
+    {
+      "name": "database_server",
+      "ip": "192.168.0.20",
+      "hostname": "database_server.local",
+      "environment": "infra",
+      "projects": [],
+      "mount_check": "/mnt/data"
+    },
+    {
+      "name": "monitor",
+      "ip": "192.168.0.30",
+      "hostname": "monitor.local",
+      "environment": "monitoring",
+      "projects": [],
+      "external_services": [
+        {
+          "name": "myproject-api",
+          "url": "https://www.mywebsite.com/myproject/health",
+          "check_cors": true,
+          "check_ssl": true
+        }
+      ]
+    }
+  ]
+}

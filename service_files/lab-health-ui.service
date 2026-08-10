@@ -1,0 +1,15 @@
+[Unit]
+Description=Lab Health UI Dashboard Service
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=graxel
+WorkingDirectory=/home/graxel/repos/lab-health
+ExecStart=/home/graxel/.cargo/bin/uv run python ui.py
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
