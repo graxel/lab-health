@@ -99,6 +99,11 @@ def check_tcp_reachability(host: str, port: int, timeout: int = 3) -> bool:
     except Exception:
         return False
 
+from dotenv import load_dotenv
+
+load_dotenv("settings.env")
+load_dotenv("secrets.env")
+
 @app.get("/lab-health")
 def health_check(services: str = ""):
     # CPU load average (1m, 5m, 15m)
@@ -124,8 +129,12 @@ def health_check(services: str = ""):
             if svc_clean:
                 systemd_results.append(check_systemd_service(svc_clean))
     
-    # Check TCP reachability to icehouse Postgres (192.168.0.100:5432)
-    can_reach_icehouse_postgres = check_tcp_reachability("192.168.0.100", 5432)
+    # Check TCP reachability to database host (reads DB_HOST & DB_PORT from settings.env / secrets.env)
+    target_host = os.getenv("DB_HOST")
+    raw_port = os.getenv("DB_PORT")
+    target_port = int(raw_port) if raw_port and raw_port.isdigit() else None
+    
+    can_reach_target = check_tcp_reachability(target_host, target_port) if (target_host and target_port) else False
     
     return {
         "system_load": [load1, load5, load15],
@@ -138,7 +147,7 @@ def health_check(services: str = ""):
         "net_sent_bytes": net_io.bytes_sent if net_io else 0,
         "net_recv_bytes": net_io.bytes_recv if net_io else 0,
         "ssd_ok": check_mount_point("/mnt/ssd") if os.path.exists("/mnt/ssd") else True,
-        "can_reach_icehouse_postgres": can_reach_icehouse_postgres,
+        "can_reach_icehouse_postgres": can_reach_target,
         "systemd_services": systemd_results,
         "docker_containers": get_docker_containers(),
         "branch": get_current_branch()

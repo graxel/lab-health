@@ -67,9 +67,12 @@ def check_hostname_resolution(hostname: str, expected_ip: str) -> dict:
 
 def monitor_icehouse_postgres_queries(local_conn, icehouse_ip="192.168.0.100", icehouse_port=5432):
     """Connect to icehouse Postgres to inspect heavy queries from pg_stat_statements"""
-    icehouse_db_user = os.getenv("ICEHOUSE_DB_USER", "postgres")
-    icehouse_db_pass = os.getenv("ICEHOUSE_DB_PASSWORD", "")
-    icehouse_db_name = os.getenv("ICEHOUSE_DB_NAME", "postgres")
+    icehouse_db_user = os.getenv("ICEHOUSE_DB_USER")
+    icehouse_db_pass = os.getenv("ICEHOUSE_DB_PASSWORD")
+    icehouse_db_name = os.getenv("ICEHOUSE_DB_NAME")
+    
+    if not (icehouse_db_user and icehouse_db_pass and icehouse_db_name):
+        return
     
     conn_str = f"host={icehouse_ip} port={icehouse_port} dbname={icehouse_db_name} user={icehouse_db_user} password={icehouse_db_pass} connect_timeout=5"
     
@@ -119,14 +122,14 @@ def monitor_loop():
     load_dotenv("settings.env")
     load_dotenv("secrets.env")
     
-    poll_interval = int(os.getenv("POLL_INTERVAL_SECONDS", 60))
+    poll_interval = int(os.getenv("POLL_INTERVAL_SECONDS", "60"))
     
     conn_info = f"""
-        host={os.getenv("DB_HOST", "localhost")} 
-        port={os.getenv("DB_PORT", "5432")} 
-        dbname={os.getenv("DB_NAME", "lab_health")} 
-        user={os.getenv("DB_USER", "postgres")} 
-        password={os.getenv("DB_PASSWORD", "")}
+        host={os.getenv("DB_HOST")} 
+        port={os.getenv("DB_PORT")} 
+        dbname={os.getenv("DB_NAME")} 
+        user={os.getenv("DB_USER")} 
+        password={os.getenv("DB_PASSWORD")}
     """
 
     while True:

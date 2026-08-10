@@ -9,23 +9,29 @@ echo "========================================================="
 MISSING_CONFIG=0
 
 if [ ! -f "settings.env" ]; then
-    echo "❌ Error: 'settings.env' is missing."
-    echo "   Please copy 'example_settings.env' to 'settings.env' and edit it with your parameters:"
-    echo "   cp example_settings.env settings.env"
+    echo ""
+    echo "Error: 'settings.env' is missing."
+    echo "Please copy 'example_settings.env' to 'settings.env' and edit it with your parameters:"
+    echo "  cp example_settings.env settings.env"
+    echo "  nano settings.env"
     MISSING_CONFIG=1
 fi
 
 if [ ! -f "secrets.env" ]; then
-    echo "❌ Error: 'secrets.env' is missing."
-    echo "   Please copy 'example_secrets.env' to 'secrets.env' and edit it with your parameters:"
-    echo "   cp example_secrets.env secrets.env"
+    echo ""
+    echo "Error: 'secrets.env' is missing."
+    echo "Please copy 'example_secrets.env' to 'secrets.env' and edit it with your parameters:"
+    echo "  cp example_secrets.env secrets.env"
+    echo "  nano secrets.env"
     MISSING_CONFIG=1
 fi
 
 if [ ! -f "machines.json" ]; then
-    echo "❌ Error: 'machines.json' is missing."
-    echo "   Please copy 'example_machines.json' to 'machines.json' and edit it with your topology parameters:"
-    echo "   cp example_machines.json machines.json"
+    echo ""
+    echo "Error: 'machines.json' is missing."
+    echo "Please copy 'example_machines.json' to 'machines.json' and edit it with your topology parameters:"
+    echo "  cp example_machines.json machines.json"
+    echo "  nano machines.json"
     MISSING_CONFIG=1
 fi
 
@@ -97,7 +103,7 @@ sudo systemctl enable --now lab-health-monitor.service
 sudo systemctl enable --now lab-health-ui.service
 
 echo ""
-echo "✅ Controller Node setup complete!"
+echo "Controller Node setup complete!"
 echo "Lab Health Dashboard is running at http://localhost:8000"
 echo ""
 echo "STATUS SUMMARY:"

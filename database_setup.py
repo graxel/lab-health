@@ -7,11 +7,11 @@ def setup_db():
     load_dotenv("secrets.env")
     
     conn_info = f"""
-        host={os.getenv("DB_HOST", "localhost")} 
-        port={os.getenv("DB_PORT", "5432")} 
-        dbname={os.getenv("DB_NAME", "lab_health")} 
-        user={os.getenv("DB_USER", "postgres")} 
-        password={os.getenv("DB_PASSWORD", "")}
+        host={os.getenv("DB_HOST")} 
+        port={os.getenv("DB_PORT")} 
+        dbname={os.getenv("DB_NAME")} 
+        user={os.getenv("DB_USER")} 
+        password={os.getenv("DB_PASSWORD")}
     """
     
     try:
