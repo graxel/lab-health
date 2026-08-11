@@ -41,22 +41,24 @@ if [ "$MISSING_CONFIG" -eq 1 ]; then
     exit 1
 fi
 
-# 1. Ensure uv is installed
+# 1. Ensure uv is installed and in PATH
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+
 if ! command -v uv &> /dev/null; then
     echo "Installing uv package manager..."
     curl -LsSf https://astral.sh/uv/install.sh | sh
-    export PATH="$HOME/.cargo/bin:$PATH"
+    export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 fi
 
 # 2. Sync python dependencies
 echo "Syncing Python dependencies with uv..."
 uv sync
 
-# 3. Ensure PostgreSQL is installed and running
+# 3. Ensure PostgreSQL & C client headers are installed and running
 if ! command -v psql &> /dev/null; then
-    echo "Installing PostgreSQL..."
+    echo "Installing PostgreSQL & libpq-dev..."
     sudo apt-get update
-    sudo apt-get install -y postgresql postgresql-contrib
+    sudo apt-get install -y postgresql postgresql-contrib libpq-dev gcc python3-dev
     sudo systemctl enable --now postgresql
 fi
 
@@ -86,7 +88,7 @@ uv run python database_setup.py
 USER_HOME="$HOME"
 USER_NAME="$USER"
 REPO_DIR="$PWD"
-UV_BIN="$USER_HOME/.cargo/bin/uv"
+UV_BIN="$(command -v uv || echo "$USER_HOME/.local/bin/uv")"
 
 echo "Installing systemd service units..."
 for svc in lab-health-reporter lab-health-monitor lab-health-ui; do

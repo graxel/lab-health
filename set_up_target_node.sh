@@ -32,6 +32,15 @@ if [ "$MISSING_CONFIG" -eq 1 ]; then
     exit 1
 fi
 
+# 1. Ensure uv is installed and in PATH
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+
+if ! command -v uv &> /dev/null; then
+    echo "Installing uv package manager..."
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+fi
+
 # 2. Sync python virtual environment
 echo "Syncing Python dependencies with uv..."
 uv sync
@@ -50,10 +59,11 @@ sudo cp service_files/lab-health-reporter.service "$SERVICE_PATH"
 
 USER_HOME="$HOME"
 USER_NAME="$USER"
+UV_BIN="$(command -v uv || echo "$USER_HOME/.local/bin/uv")"
 
 sudo sed -i "s|User=graxel|User=$USER_NAME|g" "$SERVICE_PATH"
 sudo sed -i "s|/home/graxel/repos/lab-health|$PWD|g" "$SERVICE_PATH"
-sudo sed -i "s|/home/graxel/.cargo/bin/uv|$USER_HOME/.cargo/bin/uv|g" "$SERVICE_PATH"
+sudo sed -i "s|/home/graxel/.cargo/bin/uv|$UV_BIN|g" "$SERVICE_PATH"
 
 sudo systemctl daemon-reload
 sudo systemctl enable --now lab-health-reporter.service
