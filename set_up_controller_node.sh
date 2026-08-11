@@ -56,6 +56,18 @@ sudo apt-get update
 sudo apt-get install -y postgresql postgresql-contrib libpq-dev libffi-dev gcc python3-dev
 sudo systemctl enable --now postgresql
 
+# Ensure PostgreSQL listens on all interfaces (localhost and LAN IP)
+PG_CONF=$(ls /etc/postgresql/*/*/postgresql.conf 2>/dev/null | head -n 1 || true)
+if [ -n "$PG_CONF" ]; then
+    sudo sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/g" "$PG_CONF"
+    sudo sed -i "s/listen_addresses = 'localhost'/listen_addresses = '*'/g" "$PG_CONF"
+    PG_HBA=$(dirname "$PG_CONF")/pg_hba.conf
+    if [ -f "$PG_HBA" ] && ! grep -q "0.0.0.0/0" "$PG_HBA"; then
+        echo "host    all             all             0.0.0.0/0               scram-sha-256" | sudo tee -a "$PG_HBA" > /dev/null
+    fi
+    sudo systemctl restart postgresql
+fi
+
 # 3. Sync python dependencies
 echo "Syncing Python dependencies with uv..."
 uv sync
@@ -77,6 +89,7 @@ sudo -u postgres psql -tc "SELECT 1 FROM pg_roles WHERE rolname = '$DB_USER_VAL'
     sudo -u postgres psql -c "CREATE USER $DB_USER_VAL WITH PASSWORD '$DB_PASS_VAL';"
 
 sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE $DB_NAME_VAL TO $DB_USER_VAL;"
+sudo -u postgres psql -c "ALTER DATABASE $DB_NAME_VAL OWNER TO $DB_USER_VAL;"
 
 # 5. Initialize Schema
 echo "Initializing database tables & indexes..."
