@@ -82,6 +82,7 @@ def index():
     # Build HTML tables cleanly
     hw_html = ""
     for r in hw_rows:
+        load1 = round(r[4], 2) if r[4] is not None else "N/A"
         temp = f"{r[5]}°C" if r[5] is not None else "N/A"
         ssd = "✅ OK" if r[7] else "❌ Error"
         hw_html += f"""
@@ -89,7 +90,7 @@ def index():
             <td class="px-4 py-3 font-semibold text-white">{r[0]}</td>
             <td class="px-4 py-3 text-gray-300">{r[1]}</td>
             <td class="px-4 py-3 text-gray-400 font-mono text-sm">{r[2] or 'N/A'}</td>
-            <td class="px-4 py-3 text-gray-300">{r[4]}</td>
+            <td class="px-4 py-3 text-gray-300 font-mono">{load1}</td>
             <td class="px-4 py-3 text-yellow-400 font-mono">{temp}</td>
             <td class="px-4 py-3 text-blue-400 font-mono">{round(r[6] or 0, 1)}%</td>
             <td class="px-4 py-3">{ssd}</td>
@@ -113,6 +114,7 @@ def index():
     ext_html = ""
     for r in ext_rows:
         badge = '<span class="px-2 py-1 bg-green-900 text-green-300 rounded text-xs font-bold">PASS</span>' if r[6] else '<span class="px-2 py-1 bg-red-900 text-red-300 rounded text-xs font-bold">FAIL</span>'
+        latency_val = f"{r[4]} ms" if r[4] is not None else "N/A"
         ssl_val = f"{r[5]} days" if r[5] is not None and r[5] >= 0 else "N/A"
         ext_html += f"""
         <tr class="border-b border-gray-700 hover:bg-gray-800">
@@ -120,7 +122,7 @@ def index():
             <td class="px-4 py-3 text-gray-400 text-xs uppercase">{r[1]}</td>
             <td class="px-4 py-3 text-gray-300 text-sm font-mono truncate max-w-xs">{r[2]}</td>
             <td class="px-4 py-3 font-mono text-sm">{r[3] or '-'}</td>
-            <td class="px-4 py-3 font-mono text-sm">{r[4]} ms</td>
+            <td class="px-4 py-3 font-mono text-sm">{latency_val}</td>
             <td class="px-4 py-3 font-mono text-sm text-purple-400">{ssl_val}</td>
             <td class="px-4 py-3">{badge}</td>
         </tr>
@@ -133,6 +135,7 @@ def index():
             <td class="px-4 py-3 text-gray-300">{r[1]}</td>
             <td class="px-4 py-3 text-gray-300 font-mono">{r[2]}</td>
             <td class="px-4 py-3 text-yellow-400 font-mono">{r[3]} ms</td>
+            <td class="px-4 py-3 text-yellow-300 font-mono">{r[4]} ms</td>
             <td class="px-4 py-3 text-gray-400 font-mono text-xs max-w-md truncate">{r[5]}</td>
         </tr>
         """
@@ -230,10 +233,11 @@ def index():
                                 <th class="px-4 py-2">Database</th>
                                 <th class="px-4 py-2">Calls</th>
                                 <th class="px-4 py-2">Total Time</th>
+                                <th class="px-4 py-2">Avg Time</th>
                                 <th class="px-4 py-2">Query</th>
                             </tr>
                         </thead>
-                        <tbody>{query_html or '<tr><td colspan="4" class="p-4 text-center text-gray-500">No heavy query logs recorded yet.</td></tr>'}</tbody>
+                        <tbody>{query_html or '<tr><td colspan="5" class="p-4 text-center text-gray-500">No heavy query logs recorded yet.</td></tr>'}</tbody>
                     </table>
                 </div>
             </div>

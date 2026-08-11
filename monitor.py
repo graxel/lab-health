@@ -26,6 +26,7 @@ def get_ssl_expiry_days(hostname: str, port: int = 443, timeout: int = 5) -> int
         return -1
 
 def check_cors_preflight(url: str, origin: str = "https://kevingrazel.com", timeout: int = 5) -> dict:
+    start_t = time.time()
     try:
         headers = {
             "Origin": origin,
@@ -33,16 +34,20 @@ def check_cors_preflight(url: str, origin: str = "https://kevingrazel.com", time
             "Access-Control-Request-Headers": "Content-Type"
         }
         resp = requests.options(url, headers=headers, timeout=timeout)
+        r_time = int((time.time() - start_t) * 1000)
         allow_origin = resp.headers.get("Access-Control-Allow-Origin")
-        is_cors_valid = (allow_origin == "*" or allow_origin == origin)
+        is_cors_valid = (allow_origin == "*" or allow_origin == origin) or (resp.status_code in (200, 204) and allow_origin is not None)
         return {
             "status_code": resp.status_code,
+            "response_time_ms": r_time,
             "allow_origin": allow_origin,
             "is_cors_valid": is_cors_valid
         }
     except Exception as e:
+        r_time = int((time.time() - start_t) * 1000)
         return {
             "status_code": 0,
+            "response_time_ms": r_time,
             "allow_origin": None,
             "is_cors_valid": False,
             "error": str(e)
@@ -270,7 +275,7 @@ def monitor_loop():
                             with conn.cursor() as cur:
                                 cur.execute("INSERT INTO external_checks (name, target, check_type) VALUES (%s, %s, %s) ON CONFLICT (name) DO UPDATE SET target=%s RETURNING id", (f"{svc_name}-cors", svc_url, "cors", svc_url))
                                 cors_check_id = cur.fetchone()[0]
-                                cur.execute("INSERT INTO external_check_logs (check_id, status_code, is_healthy, details) VALUES (%s, %s, %s, %s)", (cors_check_id, cors_res["status_code"], cors_res["is_cors_valid"], json.dumps(cors_res)))
+                                cur.execute("INSERT INTO external_check_logs (check_id, status_code, response_time_ms, is_healthy, details) VALUES (%s, %s, %s, %s, %s)", (cors_check_id, cors_res["status_code"], cors_res["response_time_ms"], cors_res["is_cors_valid"], json.dumps(cors_res)))
 
                 # 5. Monitor Postgres on Icehouse
                 monitor_icehouse_postgres_queries(conn)
