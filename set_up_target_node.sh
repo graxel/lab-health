@@ -41,7 +41,12 @@ if ! command -v uv &> /dev/null; then
     export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 fi
 
-# 2. Sync python virtual environment
+# 2. Ensure system build libraries are installed
+echo "Installing system build libraries..."
+sudo apt-get update
+sudo apt-get install -y libpq-dev libffi-dev gcc python3-dev
+
+# 3. Sync python dependencies
 echo "Syncing Python dependencies with uv..."
 uv sync
 

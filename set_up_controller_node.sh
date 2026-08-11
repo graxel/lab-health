@@ -50,17 +50,15 @@ if ! command -v uv &> /dev/null; then
     export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 fi
 
-# 2. Sync python dependencies
+# 2. Ensure PostgreSQL & system build libraries are installed
+echo "Installing PostgreSQL & system build libraries..."
+sudo apt-get update
+sudo apt-get install -y postgresql postgresql-contrib libpq-dev libffi-dev gcc python3-dev
+sudo systemctl enable --now postgresql
+
+# 3. Sync python dependencies
 echo "Syncing Python dependencies with uv..."
 uv sync
-
-# 3. Ensure PostgreSQL & C client headers are installed and running
-if ! command -v psql &> /dev/null; then
-    echo "Installing PostgreSQL & libpq-dev..."
-    sudo apt-get update
-    sudo apt-get install -y postgresql postgresql-contrib libpq-dev gcc python3-dev
-    sudo systemctl enable --now postgresql
-fi
 
 # Load DB configuration parameters from settings.env & secrets.env
 export $(grep -v '^#' settings.env | xargs)
