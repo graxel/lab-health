@@ -244,4 +244,5 @@ def index():
     return HTMLResponse(content=html_content)
 
 if __name__ == "__main__":
-    uvicorn.run("ui:app", host="0.0.0.0", port=8000, reload=True)
+    ui_port = int(os.getenv("UI_PORT", "8080"))
+    uvicorn.run("ui:app", host="0.0.0.0", port=ui_port, reload=True)

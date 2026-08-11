@@ -62,7 +62,7 @@ if [ -n "$PG_CONF" ]; then
     sudo sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/g" "$PG_CONF"
     sudo sed -i "s/listen_addresses = 'localhost'/listen_addresses = '*'/g" "$PG_CONF"
     PG_HBA=$(dirname "$PG_CONF")/pg_hba.conf
-    if [ -f "$PG_HBA" ] && ! grep -q "0.0.0.0/0" "$PG_HBA"; then
+    if [ -f "$PG_HBA" ] && ! sudo grep -q "0.0.0.0/0" "$PG_HBA"; then
         echo "host    all             all             0.0.0.0/0               scram-sha-256" | sudo tee -a "$PG_HBA" > /dev/null
     fi
     sudo systemctl restart postgresql
@@ -111,13 +111,13 @@ for svc in lab-health-reporter lab-health-monitor lab-health-ui; do
 done
 
 sudo systemctl daemon-reload
-sudo systemctl enable --now lab-health-reporter.service
-sudo systemctl enable --now lab-health-monitor.service
-sudo systemctl enable --now lab-health-ui.service
+sudo systemctl restart lab-health-reporter.service || sudo systemctl enable --now lab-health-reporter.service
+sudo systemctl restart lab-health-monitor.service || sudo systemctl enable --now lab-health-monitor.service
+sudo systemctl restart lab-health-ui.service || sudo systemctl enable --now lab-health-ui.service
 
 echo ""
 echo "Controller Node setup complete!"
-echo "Lab Health Dashboard is running at http://localhost:8000"
+echo "Lab Health Dashboard is running at http://localhost:8080"
 echo ""
 echo "STATUS SUMMARY:"
 sudo systemctl status lab-health-monitor.service --no-pager
